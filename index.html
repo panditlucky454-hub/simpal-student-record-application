@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Student Record Application</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--text:#1c2333;--muted:#667085;--line:#dfe3ec;--pri:#3b5bdb;--priText:#fff;--err:#c92a2a;--ok:#2b8a3e;--errBg:#fff0f0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12151d;--card:#1b1f2b;--text:#e8ebf3;--muted:#9aa3b8;--line:#2c3244;--pri:#748ffc;--priText:#10131c;--err:#ff8787;--ok:#69db7c;--errBg:#3a1d1f;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#12151d;--card:#1b1f2b;--text:#e8ebf3;--muted:#9aa3b8;--line:#2c3244;--pri:#748ffc;--priText:#10131c;--err:#ff8787;--ok:#69db7c;--errBg:#3a1d1f;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5}
+header{padding:28px 20px 8px;max-width:1000px;margin:auto}
+h1{margin:0;font-size:1.6rem}
+header p{margin:4px 0 0;color:var(--muted)}
+main{max-width:1000px;margin:auto;padding:12px 20px 40px;display:grid;gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+h2{margin:0 0 12px;font-size:1.1rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+label{display:block;font-size:.82rem;color:var(--muted);margin-bottom:3px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font-size:.95rem}
+input.bad{border-color:var(--err)}
+.msg{color:var(--err);font-size:.78rem;min-height:1.1em;margin-top:2px}
+.btns{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+button{border:0;border-radius:8px;padding:9px 16px;font-size:.92rem;cursor:pointer;background:var(--pri);color:var(--priText)}
+button.sec{background:transparent;color:var(--text);border:1px solid var(--line)}
+button.sm{padding:5px 10px;font-size:.8rem}
+button.del{background:var(--err);color:var(--priText)}
+#alert{display:none;padding:10px 14px;border-radius:8px;font-size:.9rem}
+#alert.err{display:block;background:var(--errBg);color:var(--err);border:1px solid var(--err)}
+#alert.ok{display:block;color:var(--ok);border:1px solid var(--ok)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.stat{text-align:center;padding:10px;border:1px solid var(--line);border-radius:10px}
+.stat b{display:block;font-size:1.4rem}
+.stat span{font-size:.78rem;color:var(--muted)}
+.bar{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.bar input{flex:1;min-width:180px}
+.wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:.8rem}
+td.act{display:flex;gap:6px}
+.empty{text-align:center;color:var(--muted);padding:18px}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:0 20px 28px}
+</style>
+</head>
+<body>
+<header>
+<h1>Student Record Application</h1>
+<p>Add, search, edit and delete student records, with input validation and exception handling.</p>
+</header>
+<main>
+<div id="alert" role="alert"></div>
+
+<section class="card">
+<h2 id="formTitle">Add student</h2>
+<div class="grid">
+<div><label for="name">Full name</label><input id="name" placeholder="e.g. Lucky Tiwari"><div class="msg" id="e-name"></div></div>
+<div><label for="prn">PRN</label><input id="prn" placeholder="e.g. 26ET2041030" maxlength="11"><div class="msg" id="e-prn"></div></div>
+<div><label for="roll">Roll no.</label><input id="roll" type="number" placeholder="e.g. 30"><div class="msg" id="e-roll"></div></div>
+<div><label for="div">Division</label><select id="div"><option value="">Select</option><option>A</option><option>B</option><option>C</option><option>D</option></select><div class="msg" id="e-div"></div></div>
+<div><label for="email">Email</label><input id="email" type="text" placeholder="name@example.com"><div class="msg" id="e-email"></div></div>
+<div><label for="phone">Phone</label><input id="phone" placeholder="10-digit mobile" maxlength="10"><div class="msg" id="e-phone"></div></div>
+<div><label for="marks">Marks (out of 100)</label><input id="marks" type="number" placeholder="0 to 100"><div class="msg" id="e-marks"></div></div>
+</div>
+<div class="btns">
+<button id="saveBtn">Add student</button>
+<button class="sec" id="cancelBtn" style="display:none">Cancel edit</button>
+<button class="sec" id="clearBtn">Clear form</button>
+</div>
+</section>
+
+<section class="card">
+<h2>Summary</h2>
+<div class="stats">
+<div class="stat"><b id="sCount">0</b><span>Students</span></div>
+<div class="stat"><b id="sAvg">0</b><span>Average marks</span></div>
+<div class="stat"><b id="sTop">–</b><span>Topper</span></div>
+<div class="stat"><b id="sPass">0</b><span>Passed (≥ 40)</span></div>
+</div>
+</section>
+
+<section class="card">
+<h2>Student records</h2>
+<div class="bar">
+<input id="search" placeholder="Search by name, PRN or roll no.">
+<select id="filterDiv" style="max-width:150px"><option value="">All divisions</option><option>A</option><option>B</option><option>C</option><option>D</option></select>
+</div>
+<div class="wrap"><table>
+<thead><tr><th>Roll</th><th>Name</th><th>PRN</th><th>Div</th><th>Email</th><th>Phone</th><th>Marks</th><th>Grade</th><th>Actions</th></tr></thead>
+<tbody id="rows"></tbody>
+</table></div>
+</section>
+</main>
+<footer>Mini Project: Student Record Application &middot; Developed by Lucky Tiwari &middot; PRN 26ET2041030 &middot; Roll no. 30 &middot; Div A</footer>
+
+<script>
+"use strict";
+// ---- Custom exception for validation failures ----
+class ValidationError extends Error {
+  constructor(field, message) { super(message); this.name = "ValidationError"; this.field = field; }
+}
+class DuplicateError extends Error {
+  constructor(field, message) { super(message); this.name = "DuplicateError"; this.field = field; }
+}
+
+const KEY = "student_records_v1";
+let students = [];
+let editingPrn = null;
+
+// ---- Storage with exception handling ----
+function loadData() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    const data = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(data)) throw new Error("Stored data is corrupted");
+    students = data;
+  } catch (err) {
+    students = [];
+    showAlert("Could not load saved records (" + err.message + "). Starting fresh.", "err");
+  }
+}
+function saveData() {
+  try { localStorage.setItem(KEY, JSON.stringify(students)); }
+  catch (err) { showAlert("Could not save data: " + err.message, "err"); }
+}
+
+// ---- Validation: throws ValidationError on bad input ----
+function validate(d, isEdit) {
+  if (!/^[A-Za-z][A-Za-z .'-]{1,49}$/.test(d.name)) throw new ValidationError("name", "Name must be 2 to 50 letters (spaces, . ' - allowed).");
+  if (!/^\d{2}[A-Za-z]{2}\d{7}$/.test(d.prn)) throw new ValidationError("prn", "PRN must look like 26ET2041030 (2 digits, 2 letters, 7 digits).");
+  if (!Number.isInteger(d.roll) || d.roll < 1 || d.roll > 999) throw new ValidationError("roll", "Roll no. must be a whole number from 1 to 999.");
+  if (!d.div) throw new ValidationError("div", "Please select a division.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(d.email)) throw new ValidationError("email", "Enter a valid email address.");
+  if (!/^[6-9]\d{9}$/.test(d.phone)) throw new ValidationError("phone", "Phone must be 10 digits starting with 6, 7, 8 or 9.");
+  if (!Number.isFinite(d.marks) || d.marks < 0 || d.marks > 100) throw new ValidationError("marks", "Marks must be a number from 0 to 100.");
+  const dupPrn = students.find(s => s.prn === d.prn && (!isEdit || s.prn !== editingPrn));
+  if (dupPrn) throw new DuplicateError("prn", "A student with this PRN already exists.");
+  const dupRoll = students.find(s => s.roll === d.roll && s.div === d.div && (!isEdit || s.prn !== editingPrn));
+  if (dupRoll) throw new DuplicateError("roll", "This roll no. is already used in division " + d.div + ".");
+}
+
+// ---- Helpers ----
+const $ = id => document.getElementById(id);
+const fields = ["name","prn","roll","div","email","phone","marks"];
+function showAlert(text, type) {
+  const a = $("alert"); a.textContent = text; a.className = type;
+  clearTimeout(showAlert.t); showAlert.t = setTimeout(() => { a.className = ""; }, 4000);
+}
+function clearErrors() { fields.forEach(f => { $("e-" + f).textContent = ""; $(f).classList.remove("bad"); }); }
+function showFieldError(field, msg) { $("e-" + field).textContent = msg; $(field).classList.add("bad"); $(field).focus(); }
+function readForm() {
+  return {
+    name: $("name").value.trim().replace(/\s+/g, " "),
+    prn: $("prn").value.trim().toUpperCase(),
+    roll: $("roll").value === "" ? NaN : Number($("roll").value),
+    div: $("div").value,
+    email: $("email").value.trim().toLowerCase(),
+    phone: $("phone").value.trim(),
+    marks: $("marks").value === "" ? NaN : Number($("marks").value)
+  };
+}
+function grade(m) { return m >= 75 ? "A" : m >= 60 ? "B" : m >= 50 ? "C" : m >= 40 ? "D" : "F"; }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+// ---- CRUD ----
+function saveStudent() {
+  clearErrors();
+  try {
+    const d = readForm();
+    const isEdit = editingPrn !== null;
+    validate(d, isEdit);
+    if (isEdit) {
+      const i = students.findIndex(s => s.prn === editingPrn);
+      if (i === -1) throw new Error("Record to update was not found.");
+      students[i] = d;
+      showAlert("Student record updated.", "ok");
+    } else {
+      students.push(d);
+      showAlert("Student added successfully.", "ok");
+    }
+    saveData(); resetForm(); render();
+  } catch (err) {
+    if (err instanceof ValidationError || err instanceof DuplicateError) {
+      showFieldError(err.field, err.message);
+      showAlert(err.name + ": " + err.message, "err");
+    } else {
+      showAlert("Unexpected error: " + err.message, "err");
+    }
+  } finally {
+    // runs whether the save succeeded or failed
+    $("saveBtn").blur();
+  }
+}
+function editStudent(prn) {
+  try {
+    const s = students.find(x => x.prn === prn);
+    if (!s) throw new Error("Student not found.");
+    editingPrn = prn;
+    fields.forEach(f => { $(f).value = s[f]; });
+    $("formTitle").textContent = "Edit student";
+    $("saveBtn").textContent = "Update student";
+    $("cancelBtn").style.display = "";
+    clearErrors();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  } catch (err) { showAlert(err.message, "err"); }
+}
+function deleteStudent(prn) {
+  try {
+    const s = students.find(x => x.prn === prn);
+    if (!s) throw new Error("Student not found.");
+    if (!confirm("Delete record of " + s.name + "?")) return;
+    students = students.filter(x => x.prn !== prn);
+    if (editingPrn === prn) resetForm();
+    saveData(); render();
+    showAlert("Record deleted.", "ok");
+  } catch (err) { showAlert(err.message, "err"); }
+}
+function resetForm() {
+  fields.forEach(f => { $(f).value = ""; });
+  editingPrn = null; clearErrors();
+  $("formTitle").textContent = "Add student";
+  $("saveBtn").textContent = "Add student";
+  $("cancelBtn").style.display = "none";
+}
+
+// ---- Rendering ----
+function render() {
+  const q = $("search").value.trim().toLowerCase();
+  const fd = $("filterDiv").value;
+  const list = students.filter(s =>
+    (!fd || s.div === fd) &&
+    (!q || s.name.toLowerCase().includes(q) || s.prn.toLowerCase().includes(q) || String(s.roll) === q)
+  ).sort((a, b) => a.div.localeCompare(b.div) || a.roll - b.roll);
+  $("rows").innerHTML = list.length ? list.map(s => `<tr>
+    <td>${s.roll}</td><td>${esc(s.name)}</td><td>${esc(s.prn)}</td><td>${esc(s.div)}</td>
+    <td>${esc(s.email)}</td><td>${esc(s.phone)}</td><td>${s.marks}</td><td>${grade(s.marks)}</td>
+    <td class="act"><button class="sm sec" data-edit="${esc(s.prn)}">Edit</button><button class="sm del" data-del="${esc(s.prn)}">Delete</button></td>
+  </tr>`).join("") : `<tr><td colspan="9" class="empty">No records found.</td></tr>`;
+  const n = students.length;
+  $("sCount").textContent = n;
+  $("sAvg").textContent = n ? (students.reduce((t, s) => t + s.marks, 0) / n).toFixed(1) : "0";
+  $("sTop").textContent = n ? students.reduce((a, b) => b.marks > a.marks ? b : a).name.split(" ")[0] : "–";
+  $("sPass").textContent = students.filter(s => s.marks >= 40).length;
+}
+
+// ---- Events ----
+$("saveBtn").addEventListener("click", saveStudent);
+$("cancelBtn").addEventListener("click", resetForm);
+$("clearBtn").addEventListener("click", resetForm);
+$("search").addEventListener("input", render);
+$("filterDiv").addEventListener("change", render);
+$("rows").addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.edit) editStudent(b.dataset.edit);
+  if (b.dataset.del) deleteStudent(b.dataset.del);
+});
+window.addEventListener("error", e => showAlert("Unexpected error: " + e.message, "err"));
+
+loadData();
+render();
+</script>
+</body>
+</html>
